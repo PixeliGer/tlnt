@@ -1,23 +1,82 @@
-$(document).ready(function() {
-    var career_modal = $('#careerModal');
-    var resume_modal = $('#resumeModal');
+var root_uri = 'http://localhost:8000';
+var file;
 
+$(document).ready(function() {
     render_modal();
     careers();
 
+    var career_modal = $('#careerModal');
+    var resume_modal = $('#resumeModal');
     var response_modal = $('#responseModal');
-    success_modal();
 
-    $('#btnSendResume').click(function(event) {
-        $('#resumeModal').modal({
+    var career_form = $('#career_form');
+    var resume_form = $('#resume_form');
+
+    var btnSendResume = $('#btnSendResume');
+    var btnCareerApply = $('#btnCareerApply');
+    var btnResumeApply = $('#btnResumeApply');
+
+    $(':file').on('change', function() {
+        file = this.files[0];
+        // if (file.size > 1024) {
+        //     alert('max upload size is 1k')
+        // }
+        // Also see .name, .type
+    });
+
+    btnSendResume.click(function(event) {
+        resume_modal.modal({
             backdrop: 'static',
             keyboard: true,
             show: true
         });
     });
 
+    btnCareerApply.click(function(event) {
+        if (career_form.valid()) {
+            var vacante = career_modal.attr('career');
+            var careerData = {
+                firstName : career_modal.find( $('input[name="firstName"]') ).val(),
+                telephone : career_modal.find( $('input[name="telephone"]') ).val(),
+                email     : career_modal.find($('input[name="email"]') ).val(),
+                vacante   : vacante,
+                archivos  : file
+            };
+
+            var form = new FormData();
+            form.append("nombre", careerData.firstName);
+            form.append("telefono", careerData.telephone);
+            form.append("email", careerData.email);
+            form.append("vacante", careerData.vacante);
+            form.append("archivos[]", careerData.archivos);
+
+            career_apply(form);
+        }
+    });
+
+    btnResumeApply.click(function(event) {
+        if (resume_form.valid()) {
+            var careerData = {
+                descripcion : resume_modal.find( $('textarea[name="r_descripcion"]') ).val(),
+                firstName : resume_modal.find( $('input[name="r_firstName"]') ).val(),
+                telephone : resume_modal.find( $('input[name="r_telephone"]') ).val(),
+                email     : resume_modal.find($('input[name="r_email"]') ).val(),
+                vacante   : 'general',
+                archivos  : file
+            }
+
+            var form = new FormData();
+            form.append("nombre", careerData.firstName);
+            form.append("telefono", careerData.telephone);
+            form.append("email", careerData.email);
+            form.append("vacante", careerData.vacante);
+            form.append("archivos[]", careerData.archivos);
+
+            career_apply(form);
+        }
+    });
+
     function careers() {
-        var root_uri = 'http://localhost:8000';
         $.ajax({
             url: root_uri + '/listaVacantesJSON',
             type: 'GET',
@@ -26,14 +85,43 @@ $(document).ready(function() {
         .done(function(data) {
             var careers = data;
             var arr = $.map(careers, function(el) { return el; });
+            console.log(arr);
             render_cards(arr);
         })
         .fail(function(data) {
-
+            error_modal();
         })
         .always(function(data) {
 
         });
+    }
+
+    function career_apply(data) {
+        data = data;
+        $.ajax({
+            url: root_uri + '/prospectos/crear',
+            type: 'POST',
+            dataType: 'json',
+            data: data,
+            processData: false,
+            contentType: false,
+            async: true
+        })
+        .done(function() {
+            success_modal();
+            if (career_modal.is(':visible')) {
+                career_modal.modal('hide')
+            } else if (resume_modal.is(':visible')) {
+                resume_modal.modal('hide');
+            }
+        })
+        .fail(function() {
+            error_modal();
+        })
+        .always(function() {
+            console.log("complete");
+        });
+
     }
 
     function render_cards(array) {
@@ -93,6 +181,8 @@ $(document).ready(function() {
             keyboard: true,
             show: true
         });
+
+        career_modal.attr('career', _id);
     }
 
     function success_modal() {
@@ -103,7 +193,7 @@ $(document).ready(function() {
             backdrop: 'static',
             keyboard: true,
             show: true
-        })
+        });
     }
 
     function error_modal() {
@@ -114,7 +204,7 @@ $(document).ready(function() {
             backdrop: 'static',
             keyboard: true,
             show: true
-        })
+        });
     }
 
     function render_modal() {
@@ -141,7 +231,7 @@ $(document).ready(function() {
                             .add($('<p/>'))
                         })
                     }))
-                    .add( $('<div/>',{
+                    .add( $('<div/>', {
                         class: 'modal-footer center-stuff',
                         html: $('<button/>',{
                             type: 'button',
@@ -154,5 +244,118 @@ $(document).ready(function() {
             })
         }).insertAfter($('#careerModal'));
     }
+
+    career_form.validate({
+        rules: {
+            firstName: {
+                required: true
+            },
+            telephone: {
+                required: true,
+                number: true
+            },
+            email: {
+                required: true,
+                email: true
+            },
+            'archivos[]': {
+                required: true,
+                extension: 'png|pdf'
+            }
+        },
+        messages: {
+            firstName: {
+                required: "Oops, este campo es requerido"
+            },
+            telephone:{
+                required: "Oops, este campo es requerido",
+                number: "Proporciona un número válido"
+            },
+            email: {
+                required: "Oops, este campo es requerido",
+                email: "Proporciona un E-mail válido"
+            },
+            'archivos[]': {
+                required: "Proporciona un archivo de imagen o pdf",
+                extension: "El formato de tu archivo no es válido"
+            }
+        },
+        highlight: function (element) {
+            $(element).closest('.form-input').addClass('has-error');
+        },
+        unhighlight: function(element) {
+            $(element).closest('.form-input').removeClass('has-error');
+        },
+        errorPlacement: function(error, element) {
+            if (element.is('input[type="file"]')) {
+                error.insertAfter(element.closest('.file-cnt'));
+            } else {
+                error.insertAfter(element);
+            }
+        }
+    });
+
+    resume_form.validate({
+        rules: {
+            r_descripcion: {
+                required: false
+            },
+            r_firstName: {
+                required: true,
+            },
+            r_telephone: {
+                required: true,
+                number: true
+            },
+            r_email: {
+                required: true,
+                email: true
+            },
+            'r_archivos[]': {
+                required: true,
+                extension: 'png|pdf'
+            }
+        },
+        messages: {
+            r_firstName: {
+                required: "Oops, este campo es requerido"
+            },
+            r_telephone:{
+                required: "Oops, este campo es requerido",
+                number: "Proporciona un número válido"
+            },
+            r_email: {
+                required: "Oops, este campo es requerido",
+                email: "Proporciona un E-mail válido"
+            },
+            'r_archivos[]': {
+                required: "Proporciona un archivo de imagen o pdf",
+                extension: "El formato de tu archivo no es válido"
+            }
+        },
+        highlight: function (element) {
+            $(element).closest('.form-input').addClass('has-error');
+        },
+        unhighlight: function(element) {
+            $(element).closest('.form-input').removeClass('has-error');
+        },
+        errorPlacement: function(error, element) {
+            if (element.is('input[type="file"]')) {
+                error.insertAfter(element.closest('.file-cnt'));
+            } else {
+                error.insertAfter(element);
+            }
+        }
+    });
+
+    $('#close_resume').click(function(event) {
+        var validator = resume_form.validate();
+        validator.resetForm();
+    });
+
+    $('#close_career').click(function(event) {
+        var validator = career_form.validate();
+        validator.resetForm();
+    });
 
 });
