@@ -85,7 +85,6 @@ $(document).ready(function() {
         .done(function(data) {
             var careers = data;
             var arr = $.map(careers, function(el) { return el; });
-            console.log(arr);
             render_cards(arr);
         })
         .fail(function(data) {
@@ -208,7 +207,6 @@ $(document).ready(function() {
     }
 
     function render_modal() {
-        console.log('new modal');
         $('<div/>',{
             id: 'responseModal',
             class: 'modal fade',
