@@ -784,7 +784,25 @@ input[type=text]:-moz-placeholder { /* Firefox 18- */
     filter: alpha(opacity=100);
     opacity: 1;
 }
-
+/*
+Callbacks
+*/
+.callback-wrp{
+    text-align: center;
+}
+.callback-cnt{
+    display: inline-block;
+    width: 100%;
+    height: 500px;
+}
+.call-success{
+    background: url('../images/notifications-success.png') no-repeat;
+    background-position: 50% 25%;
+}
+.call-error{
+    background: url('../images/notification-error.png') no-repeat;
+    background-position: 50% 25%;
+}
 /*Curved Shadow*/
 .curved
 {

@@ -1,7 +1,12 @@
 $(document).ready(function() {
     var career_modal = $('#careerModal');
     var resume_modal = $('#resumeModal');
+
+    render_modal();
     careers();
+
+    var response_modal = $('#responseModal');
+    success_modal();
 
     $('#btnSendResume').click(function(event) {
         $('#resumeModal').modal({
@@ -88,6 +93,66 @@ $(document).ready(function() {
             keyboard: true,
             show: true
         });
+    }
+
+    function success_modal() {
+        response_modal.find('.callback-cnt').addClass('call-success');
+        response_modal.find('.callback-wrp > h2').text('AWESOME');
+        response_modal.find('.callback-wrp > p').text('Thank you, your message has been sent successfully');
+        response_modal.modal({
+            backdrop: 'static',
+            keyboard: true,
+            show: true
+        })
+    }
+
+    function error_modal() {
+        response_modal.find('.callback-cnt').addClass('call-error');
+        response_modal.find('.callback-wrp > h2').text('OH NO!');
+        response_modal.find('.callback-wrp > p').text('Something went wrong, please try again');
+        response_modal.modal({
+            backdrop: 'static',
+            keyboard: true,
+            show: true
+        })
+    }
+
+    function render_modal() {
+        console.log('new modal');
+        $('<div/>',{
+            id: 'responseModal',
+            class: 'modal fade',
+            role: 'dialog',
+            html: $('<div/>',{
+                class: 'modal-dialog talent-modal modal-lg',
+                html: $('<div/>',{
+                    class: 'modal-content',
+                    html: $('<div/>',{
+                        class: 'modal-header'
+                    })
+                    .add( $('<div/>',{
+                        class: 'modal-body curved',
+                        html: $('<div/>',{
+                            class: 'callback-wrp',
+                            html: $('<div/>',{
+                                class: 'callback-cnt'
+                            })
+                            .add($('<h2/>'))
+                            .add($('<p/>'))
+                        })
+                    }))
+                    .add( $('<div/>',{
+                        class: 'modal-footer center-stuff',
+                        html: $('<button/>',{
+                            type: 'button',
+                            class: 'button talent-btn talent-btn-white inline',
+                            'data-dismiss': 'modal',
+                            text: 'BACK HOME'
+                        })
+                    }))
+                })
+            })
+        }).insertAfter($('#careerModal'));
     }
 
 });
