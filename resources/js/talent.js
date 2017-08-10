@@ -5,16 +5,16 @@ $(document).ready(function() {
     render_modal();
     careers();
 
-    var career_modal = $('#careerModal');
-    var resume_modal = $('#resumeModal');
-    var response_modal = $('#responseModal');
+    var career_modal = $('#careerModal'),
+        resume_modal = $('#resumeModal'),
+        response_modal = $('#responseModal'),
 
-    var career_form = $('#career_form');
-    var resume_form = $('#resume_form');
+        career_form = $('#career_form'),
+        resume_form = $('#resume_form'),
 
-    var btnSendResume = $('#btnSendResume');
-    var btnCareerApply = $('#btnCareerApply');
-    var btnResumeApply = $('#btnResumeApply');
+        btnSendResume = $('#btnSendResume'),
+        btnCareerApply = $('#btnCareerApply'),
+        btnResumeApply = $('#btnResumeApply');
 
     $(':file').on('change', function() {
         file = this.files[0];
